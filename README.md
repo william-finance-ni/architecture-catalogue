@@ -2,6 +2,10 @@
 
 ![screen shot of application home page](screenshot.png)
 
+## Application architecture
+
+![screen shot of application architecture](architecture-layered-view.png)
+
 ## Installation
 
 ### Pre-requisites (Mac)
@@ -18,6 +22,13 @@ brew install php
 
 ```
 brew install mysql
+```
+
+#### Install eleasticsearch
+
+```
+brew tap elastic/tap
+brew install elastic/tap/elasticsearch-full
 ```
 
 #### Install Laravel Installer
@@ -90,3 +101,7 @@ You can run a full suite of tests using phpunit
 ```
 ./vendor/bin/phpunit
 ```
+
+## Roadmap
+
+[Architecture Catalogue Roadmap](https://github.com/dof-dss/catalogue-roadmap)
