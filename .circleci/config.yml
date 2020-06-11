@@ -247,3 +247,14 @@ workflows:
             branches:
               ignore: /.*/
           context: govuk-paas-staging
+
+      - deploy-to-govuk-space:
+          target: "PRODUCTION"
+          requires:
+            - test-with-docker
+          filters:    # selected tags and no branches
+            tags:
+              only: /^v(0|[0-9]\d*)\.(0|[0-9]\d*)\.(0|[0-9]\d*)(?:-(beta))?$/
+            branches:
+              ignore: /.*/
+          context: govuk-paas-production
