@@ -1,0 +1,260 @@
+version: 2.1
+
+orbs:
+  cloudfoundry: circleci/cloudfoundry@0.1.73
+
+commands:
+  install_php_extensions_cmd:
+    description: "Install PHP extensions"
+    steps:
+      - run: sudo apt update # PHP CircleCI 2.0 Configuration File# PHP CircleCI 2.0
+      - run: sudo docker-php-ext-install pdo pdo_mysql
+
+  install_laravel_application_cmd:
+    description: "Install Laravel application"
+    steps:
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            # "composer.lock" can be used if it is committed to the repo
+            - v1-dependencies-{{ checksum "composer.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: composer install -n --prefer-dist
+
+      - save_cache:
+          key: v1-dependencies-{{ checksum "composer.json" }}
+          paths:
+            - ./vendor
+
+  install_node_components_cmd:
+    description: "Install Node components"
+    steps:
+      - restore_cache:
+          keys:
+            - node-v1-{{ checksum "package.json" }}
+            - node-v1-
+      - run: npm install
+      - save_cache:
+          key: node-v1-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+
+  test_cmd:
+    description: "Run unit tests"
+    steps:
+      - run: touch database/database.sqlite
+      - run: php artisan migrate --env=testing --database=sqlite --force
+
+      # run tests with phpunit
+      - run: ./vendor/bin/phpunit
+
+  build_cmd:
+    description: "Install application"
+    steps:
+      - checkout
+      - install_php_extensions_cmd
+      - install_laravel_application_cmd
+      - install_node_components_cmd
+
+  install_cmd:
+    description: "Install Cloud Foundry CLI"
+    steps:
+      - run:
+          command: |
+            curl -v -L -o cf-cli_amd64.deb 'https://cli.run.pivotal.io/stable?release=debian64&source=github'
+            sudo dpkg -i cf-cli_amd64.deb
+            cf -v
+            cf api https://api.london.cloud.service.gov.uk
+            cf auth "$CF_USERNAME" "$CF_PASSWORD"
+            cf target -o "$CF_ORG" -s "$CF_SPACE"
+
+  set_env_cmd:
+    description: "Set environment variables"
+    parameters:
+      environment:
+        type: string
+      application:
+        type: string
+    steps:
+      - run:
+          command: |
+            # CiricleCI environment varialbes
+            cf set-env "${<< parameters.application >>}" CIRCLE_BUILD_NUM "${CIRCLE_BUILD_NUM}"
+            cf set-env "${<< parameters.application >>}" CIRCLE_SHA1 "${CIRCLE_SHA1}"
+            cf set-env "${<< parameters.application >>}" CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID}"
+            cf set-env "${<< parameters.application >>}" CIRCLE_PROJECT_USERNAME "${CIRCLE_PROJECT_USERNAME}"
+            cf set-env "${<< parameters.application >>}" CIRCLE_PROJECT_REPONAME "${CIRCLE_PROJECT_REPONAME}"
+            cf set-env "${<< parameters.application >>}" CIRCLE_BRANCH "${CIRCLE_BRANCH}"
+            cf set-env "${<< parameters.application >>}" CIRCLE_PULL_REQUEST "${CIRCLE_PULL_REQUEST}"
+
+            # application environment variables (static)
+            cf set-env "${<< parameters.application >>}" ADMIN_PASSWORD "${ADMIN_PASSWORD}"
+            cf set-env "${<< parameters.application >>}" ADMIN_USERNAME "${ADMIN_USERNAME}"
+            cf set-env "${<< parameters.application >>}" APP_KEY "${APP_KEY}"
+            cf set-env "${<< parameters.application >>}" APP_PAGINATION_MAX_PAGES "${APP_PAGINATION_MAX_PAGES}"
+            cf set-env "${<< parameters.application >>}" APP_PAGINATION_PAGE_SIZE "${APP_PAGINATION_PAGE_SIZE}"
+            cf set-env "${<< parameters.application >>}" AZURE_REDIRECT_URI "${AZURE_REDIRECT_URI}"
+            cf set-env "${<< parameters.application >>}" CACHE_DRIVER "${CACHE_DRIVER}"
+            cf set-env "${<< parameters.application >>}" COGNITO_REDIRECT_URI "${COGNITO_REDIRECT_URI}"
+            cf set-env "${<< parameters.application >>}" DB_CERT_PATH "${DB_CERT_PATH}"
+            cf set-env "${<< parameters.application >>}" DB_CONNECTION "${DB_CONNECTION}"
+            cf set-env "${<< parameters.application >>}" GITHUB_CALLBACK_URL "${GITHUB_CALLBACK_URL}"
+            cf set-env "${<< parameters.application >>}" GOVUK_NOTIFY_PASSWORD_RESET_TEMPLATE_ID "${GOVUK_NOTIFY_PASSWORD_RESET_TEMPLATE_ID}"
+            cf set-env "${<< parameters.application >>}" GOVUK_NOTIFY_USER_WELCOM_TEMPLATE_ID "${GOVUK_NOTIFY_USER_WELCOME_TEMPLATE_ID}"
+            cf set-env "${<< parameters.application >>}" GOVUK_NOTIFY_VERIFY_EMAIL_TEMPLATE_ID "${GOVUK_NOTIFY_VERIFY_EMAIL_TEMPLATE_ID}"
+            cf set-env "${<< parameters.application >>}" LOG_CHANNEL "${LOG_CHANNEL}"
+            cf set-env "${<< parameters.application >>}" QUEUE_CONNECTION "${QUEUE_CONNECTION}"
+            cf set-env "${<< parameters.application >>}" SESSION_DRIVER "${SESSION_DRIVER}"
+            cf set-env "${<< parameters.application >>}" SESSION_LIFETIME "${SESSION_LIFETIME}"
+
+            # application environment variables (environment specific)
+            cf set-env "${<< parameters.application >>}" APP_DEBUG "${<< parameters.environment >>_APP_DEBUG}"
+            cf set-env "${<< parameters.application >>}" APP_ENV "${<< parameters.environment >>_APP_ENV}"
+            cf set-env "${<< parameters.application >>}" APP_NAME "${<< parameters.environment >>_APP_NAME}"
+            cf set-env "${<< parameters.application >>}" APP_PHASE "${<< parameters.environment >>_APP_PHASE}"
+            cf set-env "${<< parameters.application >>}" APP_URL "${<< parameters.environment >>_APP_URL}"
+            cf set-env "${<< parameters.application >>}" COGNITO_CLIENT_ID "${<< parameters.environment >>_COGNITO_CLIENT_ID}"
+            cf set-env "${<< parameters.application >>}" COGNITO_DOMAIN "${<< parameters.environment >>_COGNITO_DOMAIN}"
+            cf set-env "${<< parameters.application >>}" GOVUK_NOTIFY_API_KEY "${<< parameters.environment >>_GOVUK_NOTIFY_API_KEY}"
+            cf set-env "${<< parameters.application >>}" LOG_SLACK_WEBHOOK_URL "${<< parameters.environment >>_LOG_SLACK_WEBHOOK_URL}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_AUDIT_API "${<< parameters.environment >>_NICS_EA_AUDIT_API}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_AUDIT_ENABLED "${<< parameters.environment >>_NICS_EA_AUDIT_ENABLED}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_COGNITO_PASSWORD "${<< parameters.environment >>_NICS_EA_COGNITO_PASSWORD}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_COGNITO_URL "${<< parameters.environment >>_NICS_EA_COGNITO_URL}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_COGNITO_USER "${<< parameters.environment >>_NICS_EA_COGNITO_USER}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_USAGE_TRACKING_ENABLED "${<< parameters.environment >>_NICS_EA_USAGE_TRACKING_ENABLED}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_USAGE_TRACKING_ACCOUNT_CREATED_EVENT_ID "${<< parameters.environment >>_NICS_EA_USAGE_TRACKING_ACCOUNT_CREATED_EVENT_ID}"
+            cf set-env "${<< parameters.application >>}" NICS_EA_USAGE_TRACKING_API "${<< parameters.environment >>_NICS_EA_USAGE_TRACKING_API}"
+            cf set-env "${<< parameters.application >>}" SESSION_DOMAIN "${<< parameters.environment >>_SESSION_DOMAIN}"
+            cf set-env "${<< parameters.application >>}" SLACK_WEBHOOK_URL "${<< parameters.environment >>_SLACK_WEBHOOK_URL}"
+
+  push_cmd:
+    description: "Standard deployment"
+    parameters:
+      environment:
+        type: string
+    steps:
+      - run:
+          command: |
+            # build the application but don't start it
+            cf push --no-start -f "${CF_MANIFEST_FILE}"
+
+      - set_env_cmd:
+          environment:  << parameters.environment >>
+          application: "<< parameters.environment >>_APP_NAME"
+
+      - run:
+          command: |
+            # start the application
+            cf start "${<< parameters.environment >>_APP_NAME}"
+
+  push_zdt_cmd:
+    description: "Zero downtime deployment"
+    parameters:
+      environment:
+        type: string
+    steps:
+      - run:
+          command: |
+            # create the application
+            cf v3-create-app $"{<< parameters.environment >>_APP_NAME}"
+
+            # apply the manifest file to the application
+            cf v3-apply-manifest -f "${CF_MANIFEST_FILE}"
+
+      - set_env_cmd:
+          environment:  << parameters.environment >>
+          application: "<< parameters.environment >>_APP_NAME"
+
+      - run:
+          command: |
+            # push a zero downtime version of the application
+            cf v3-zdt-push "${<< parameters.environment >>_APP_NAME}" --wait-for-deploy-complete
+
+executors:
+    docker-executor:
+      docker:
+        - image: circleci/php:7.3-node-browsers
+        - image: elastic/elasticsearch:7.6.2
+          environment:
+            - cluster.name: test-elasticsearch
+            - xpack.security.enabled: false
+            - transport.host: localhost
+            - network.host: 127.0.0.1
+            - http.port: 9200
+            - discovery.type: single-node
+
+    node-executor:
+      docker:
+        - image: 'circleci/node:10'
+
+jobs:
+  test-with-docker:
+    executor: docker-executor
+    steps:
+      - build_cmd
+      - test_cmd
+
+  deploy-to-govuk-space:
+    description: "Deploy to GOV.UK PaaS"
+    parameters:
+      target:
+        type: string
+    executor: docker-executor
+    steps:
+      # build the application
+      - build_cmd
+
+      # install the CF CLI
+      - install_cmd
+
+      # push the application to GOV.UK PaaS
+      - push_zdt_cmd:
+          environment: << parameters.target >>
+
+workflows:
+  deploy-to-govuk:
+    jobs:
+      - test-with-docker:
+          context: build-test
+          filters:    # all tags and all branches
+            tags:
+              only: /.*/
+
+      - deploy-to-govuk-space:
+          target: "SANDBOX"
+          requires:
+            - test-with-docker
+          filters:    # all tags and selected branches
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - /feature-.*/
+                - /bugfix-.*/
+                - /hotfix-.*/
+          context: govuk-paas-sandbox
+
+      - deploy-to-govuk-space:
+          target: "STAGING"
+          requires:
+            - test-with-docker
+          filters:    # selected tags and no branches
+            tags:
+              only: /^v(0|[0-9]\d*)\.(0|[0-9]\d*)\.(0|[0-9]\d*)(?:-(alpha|beta))?$/
+            branches:
+              ignore: /.*/
+          context: govuk-paas-staging
+
+      - deploy-to-govuk-space:
+          target: "PRODUCTION"
+          requires:
+            - test-with-docker
+          filters:    # selected tags and no branches
+            tags:
+              only: /^v(0|[0-9]\d*)\.(0|[0-9]\d*)\.(0|[0-9]\d*)(?:-(beta))?$/
+            branches:
+              ignore: /.*/
+          context: govuk-paas-production
