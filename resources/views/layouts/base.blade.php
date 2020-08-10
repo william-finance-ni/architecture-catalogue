@@ -47,7 +47,7 @@
   </script>
 
   <a href="#main-content" class="govuk-skip-link">Skip to main content</a>
-
+  @include ('partials.preview')
   <header class="govuk-header " role="banner" data-module="govuk-header">
     <div class="govuk-header__container govuk-width-container">
       <div class="govuk-header__logo">
@@ -98,6 +98,11 @@
                         Browse
                       </a>
                     </li>
+                    <li class="govuk-header__navigation-item {{ url()->current() == url('/api') ? 'govuk-header__navigation-item--active' : '' }}">
+                      <a class="govuk-header__link" href="/tokens">
+                        API
+                      </a>
+                    </li>
                     @if (auth()->user()->isAdmin())
                     <li class="govuk-header__navigation-item {{ url()->current() == url('/admin') ? 'govuk-header__navigation-item--active' : '' }}">
                       <a class="govuk-header__link" href="/admin">
@@ -146,8 +151,8 @@
               <h2 class="govuk-footer__heading govuk-heading-m">Related resources</h2>
               <ul class="govuk-footer__list govuk-footer__list--columns-1">
                   <li class="govuk-footer__list-item">
-                      <a class="govuk-footer__link" href="{{ config('app.architecture_portal_url') }}" target="_blank"  title="(external link opens in new window / tab)">
-                          Architecture Portal
+                      <a class="govuk-footer__link" href="{{ config('app.developer_portal_url') }}" target="_blank"  title="(external link opens in new window / tab)">
+                          Developer Portal
                       </a>
                   </li>
                   <li class="govuk-footer__list-item">
@@ -216,6 +221,7 @@
   <script>
     window.GOVUKFrontend.initAll()
   </script>
+  @yield('javascript')
 </body>
 
 </html>

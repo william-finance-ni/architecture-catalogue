@@ -1,3 +1,113 @@
+## 1.0.11-alpha (July 29, 2020)
+  - Prevent CI being triggered on commit of changes to CHANGELOG and VERSION
+
+## 1.0.10-alpha (July 28, 2020)
+
+
+## 1.0.9-alpha (July 28, 2020)
+  - Refine filters
+  - Fix incorrect regex
+  - Change to ignore master on deployment to staging
+
+## 1.0.8-beta (July 28, 2020)
+  - Deploy to staging on specific tags
+
+## 1.0.7-beta (July 28, 2020)
+  - Remove white space
+  - Add pull requests link and conditional rendering
+  - Add preview banner
+  - Remove experimental zero downtime push command [skip ci]
+  - Update push_cmd
+  - Run fresh build
+  - Update set_env_cmd
+  - Snadbox config 4
+  - Sandbox config 3
+  - Build sandbox config 2
+  - Merge branch 'circleci-enhancements' of https://github.com/dof-dss/architecture-catalogue into circleci-enhancements
+  - Build sandbox config
+  - Merge branch 'master' into circleci-enhancements
+  - Remove unit tests from build_cmd
+  - Install pdo on test
+  - Test on build
+  - fix syntax error
+  - Remove tests from build command
+  - Fix executor
+  - Revert to docker-executor
+  - Add attach cmd
+  - Experimental use of image
+  - Simplify
+  - Experimental path
+  - Try different paths parameter
+  - Fix syntax errors
+  - Try alternate paths
+  - Try another path
+  - Experiment with different path
+  - Try different path
+  - Add in working directory
+  - Fix syntx errors
+  - Fix syntax
+  - Move context into workflow
+  - Add in context to pickup environment variables
+  - Remove working directory
+  - Fix phpunit path
+  - Experiment remove test
+  - View repo directory
+  - View home directory
+  - test ls command
+  - Experimental ls commands
+  - Remove test command and move to job
+  - Add ls on workspace directory
+  - Add ls command to determine current path
+  - Update phpunit path
+  - Update path to phpunit
+  - Add missing touch command
+  - Add database migrations to build command
+  - Update database path
+  - Fix more syntax errors
+  - Fix syntax error
+  - First test of using workspaces in CircleCI
+  - Add CircleCI status badge
+
+## 1.0.6-beta (July 27, 2020)
+
+
+## 1.0.6-alpha (July 27, 2020)
+  - Merge pull request #232 from dof-dss/hotfix-disable-api
+  - Disable API
+  - Create pr-review.yml
+  - npm update
+
+## 1.0.5-beta (July 16, 2020)
+  - Merge pull request #231 from dof-dss/feature-number-of-entries
+  - Relates to #230
+
+## 1.0.4-beta (July 15, 2020)
+  - Fix error in CircleCI config for welecome email template id
+  - Merge pull request #229 from dof-dss/bugfix-update-circleci-prod
+  - Revert "Try set-env before applying manifest"
+
+## 1.0.3-beta (July 14, 2020)
+  - Try set-env before applying manifest
+
+## 1.0.2-beta (July 14, 2020)
+  - Fix error in CircleCI config
+
+## 1.0.1-beta (July 14, 2020)
+  - Relates to #106
+  - Merge pull request #228 from dof-dss/bugfix-user-sign-out-test-fails
+  - Merge pull request #227 from dof-dss/bugfix-branding-alignment
+  - Closes #226
+  - Closes #225
+  - Delete weekly-digest.yml
+  - Update link to roadmap
+  - Create stale.yml
+  - Fix roadmap link
+  - Add a link to the roadmap
+  - Update weekly-digest.yml
+  - Create weekly-digest.yml
+  - Merge pull request #222 from dof-dss/dependabot/npm_and_yarn/websocket-extensions-0.1.4
+  - Bump websocket-extensions from 0.1.3 to 0.1.4
+
 ## 1.0.0-alpha (June 07, 2020)
   - Merge pull request #221 from dof-dss/feature-remove-self-dependency
   - Relates to #181
